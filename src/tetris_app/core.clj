@@ -47,22 +47,23 @@
   (log/info 
    "*** Initiating a Game: input[ " input " ], grid-size:" grid-size)
   (let [shapes (clojure.string/split input #",")]
-    (loop [[head & tail] shapes
-           state []]
-      (log/info "Current Game State:" state)
-      (if (empty? head)
-        (do (log/info "Final Game State:" state)
-            state)
-        (do
-          (let [shape (str (first head))
-                col (Integer. (re-find #"\d+" head))]
-            (log/info "Processing the shape:" shape " @ column:" col)
-            (let [new-state (->> (get-valid-row shape col state grid-size)
-                                 (draw-shape shape col)
-                                 (group-cells-as-rows-cols)
-                                 (new-state-with-dirty-cells state)
-                                 (drop-rows-with-all-dirtycells grid-size))]
-              (recur tail new-state))))))))
+    (if ()
+     (loop [[head & tail] shapes
+            state []]
+       (log/info "Current Game State:" state)
+       (if (empty? head)
+         (do (log/info "Final Game State:" state)
+             state)
+         (do
+           (let [shape (str (first head))
+                 col (Integer. (re-find #"\d+" head))]
+             (log/info "Processing the shape:" shape " @ column:" col)
+             (let [new-state (->> (get-valid-row shape col state grid-size)
+                                  (draw-shape shape col)
+                                  (group-cells-as-rows-cols)
+                                  (new-state-with-dirty-cells state)
+                                  (drop-rows-with-all-dirtycells grid-size))]
+               (recur tail new-state)))))))))
 
 ;; gets a valid row, 
 ;; find the available row for the shape and check if the shape fits using the grid size
@@ -75,6 +76,7 @@
       new-row
       (inc new-row))))
 
+;; kind of dirty check for the grid-size.
 ;; checks the fitment of any shape in the provided row, col
 (defn can-shape-fit?
   "takes the shape, column, row and size as the inoput. checks can the shape fit in the provided row and produces the boolean value (true/false) output."
@@ -87,12 +89,18 @@
 (defn pick-available-row
   "takes the shape, column and game-state as the input. and produces the immediate available row to draw the shape in a dirty manner. output type - number"
   [shape col state]
-  (loop [row (count state)
-         [dirty-cells & remaining] (reverse state)]
-    (if (or (some #(= col %) dirty-cells) (= 0 row))
-      row
-      (recur (dec row) remaining))))
-  
+    (if (some #(= shape %) ["Q" "S" "I" "L" "J"])
+    (loop [row (count state)
+           [dirty-cells & remaining] (reverse state)]
+      (if (or (some #(= col %) dirty-cells) (= 0 row))
+        row
+        (recur (dec row) remaining)))
+    (reduce
+      (fn [row dirty-cells]
+        (if (some #(= col %) dirty-cells)
+          (inc row)
+          row))
+      0 state)))
 
 ;; draws the shape in the grid with the provided row and col
 (defn draw-shape

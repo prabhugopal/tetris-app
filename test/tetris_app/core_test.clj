@@ -7,8 +7,8 @@
     (is 
      (= 
       (get-shape-orientation "Q") 
-      ['(0 0) '(0 1)
-       '(1 0) '(1 1)]))))
+      ['(1 0) '(1 1)
+       '(0 0) '(0 1)]))))
 
 (deftest test-get-valid-row
   (testing "get-valid-row.."
@@ -35,7 +35,13 @@
            1))))
 
 (deftest test-example-2
-  (testing "Example1 : T1,Z3,I4"
+  (testing "Example2 : T1,Z3,I4"
     (is (= (-> (play-game "T1,Z3,I4" 10)
                (parse-the-game-state-to-rows))
            4))))
+
+(deftest test-example-3
+  (testing "Example3 : Q0,I2,I6,I0,I6,I6,Q2,Q4"
+    (is (= (-> (play-game "Q0,I2,I6,I0,I6,I6,Q2,Q4" 10)
+               (parse-the-game-state-to-rows))
+           3))))
