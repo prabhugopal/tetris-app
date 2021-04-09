@@ -5,20 +5,19 @@
   (:import (java.io BufferedReader)))
 
 (declare
-  get-input
-  play-game
-  parse-the-game-state-to-rows
-  get-valid-row
-  can-shape-fit?
-  pick-available-row
-  draw-shape
-  get-shape-orientation
-  drop-rows-with-all-dirtycells
-  new-state-with-dirty-cells
-  group-cells-as-rows-cols)
+ get-input
+ play-game
+ parse-the-game-state-to-rows
+ get-valid-row
+ can-shape-fit?
+ pick-available-row
+ draw-shape
+ get-shape-orientation
+ drop-rows-with-all-dirtycells
+ new-state-with-dirty-cells
+ group-cells-as-rows-cols)
 
 (def grid-size 10)
-
 
 (defn -main
   "I don't do a whole lot ... yet."
@@ -26,8 +25,8 @@
   (log/info "****** Welcome to SiTE a Simplified Tetris Engine  ******")
   (doseq [input-shapes (get-input)]
     (println
-      (-> (play-game input-shapes grid-size)
-          (parse-the-game-state-to-rows)))))
+     (-> (play-game input-shapes grid-size)
+         (parse-the-game-state-to-rows)))))
 
 ;; reads the input sequence from the console/file
 (defn get-input
@@ -46,7 +45,7 @@
   "takes the  sequence of shapes and the grid-size as input. sequence of shapes should be comma seperated string e.g \"Q0,I4,T3\" and the number for grid size. outputs the game state."
   [input grid-size]
   (log/info
-    "*** Initiating a Game: input[ " input " ], grid-size:" grid-size)
+   "*** Initiating a Game: input[ " input " ], grid-size:" grid-size)
   (let [shapes (clojure.string/split input #",")]
     (if ()
       (loop [[head & tail] shapes
@@ -97,25 +96,27 @@
   (do
     (log/info "state :: " state)
     (not-any?
-      (fn [dirty-cells]
-        (do
-          (log/info "dirty-cells :: " dirty-cells "state :: " state)
-          (let [is-zero? (zero?
-                           (compare
-                             (vec (sort
-                                    (second dirty-cells)))
-                             (vec (sort
-                                    (nth state (first dirty-cells) #{})))))
-                is-exceed-size? (not-any?
-                                  #(>= % size)
-                                  (second dirty-cells))
-                res (and is-zero? is-exceed-size?)]
-            (log/info "is-zero? ::  " is-zero? " is-exceed-size? :: " is-exceed-size?)
-            res)))
-      (group-cells-as-rows-cols (draw-shape shape col row)))))
+     (fn [dirty-cells]
+       (do
+         (log/info "dirty-cells :: " dirty-cells "state :: " state)
+         (let [is-zero? (zero?
+                         (compare
+                          (vec (sort
+                                (second dirty-cells)))
+                          (vec (sort
+                                (nth state (first dirty-cells) #{})))))
+               is-exceed-size? (not-any?
+                                #(>= % size)
+                                (second dirty-cells))
+               res (and is-zero? is-exceed-size?)]
+           (log/info "is-zero? ::  " is-zero? " is-exceed-size? :: " is-exceed-size?)
+           res)))
+     (group-cells-as-rows-cols (draw-shape shape col row)))))
 
 
 ;; dirty pick of the available row without validating the size
+
+
 (defn pick-available-row
   "takes the shape, column and game-state as the input. and produces the immediate available row to draw the shape in a dirty manner. output type - number"
   [shape col state]
@@ -149,8 +150,8 @@
   "takes the shape, column, and row as input and draws the shape in the grid. produces the points/cells of the shape. output type - vector of (x,y) cells/points"
   [shape col row]
   (map
-    (fn [cells] (map + (list row col) cells))
-    (get-shape-orientation shape)))
+   (fn [cells] (map + (list row col) cells))
+   (get-shape-orientation shape)))
 
 ;;gets the given shape orientation
 (defn get-shape-orientation
@@ -163,11 +164,11 @@
   "takes the grid-size and game-state as input and drops all the completely occupied rows or the rows which do not have any empty cells/columns."
   [size state]
   (reduce
-    (fn [new-state row]
-      (if (not= (count row) size)
-        (assoc new-state (count new-state) row)
-        new-state))
-    [] state))
+   (fn [new-state row]
+     (if (not= (count row) size)
+       (assoc new-state (count new-state) row)
+       new-state))
+   [] state))
 
 ;;returns the new state with dirty cells
 (defn new-state-with-dirty-cells
@@ -175,12 +176,12 @@
   [current-state rows-cols]
   (log/info "current-state :: " current-state " rows-cols :: " rows-cols)
   (reduce
-    (fn [state cells]
-      (log/info state "--" cells "--" (first cells))
-      (assoc state (first cells)
-                   (set (concat (nth state (first cells) #{})
-                                (last cells)))))
-    current-state (sort rows-cols)))
+   (fn [state cells]
+     (log/info state "--" cells "--" (first cells))
+     (assoc state (first cells)
+            (set (concat (nth state (first cells) #{})
+                         (last cells)))))
+   current-state (sort rows-cols)))
 
 ;;groups the cells into rows and columns
 (defn group-cells-as-rows-cols
@@ -188,7 +189,7 @@
   [grid-cells]
   (log/info "grid-cells: " grid-cells)
   (sort (map
-          (fn [point]
-            (do
-              [(first point) (set (map last (last point)))]))
-          (group-by first grid-cells))))
+         (fn [point]
+           (do
+             [(first point) (set (map last (last point)))]))
+         (group-by first grid-cells))))

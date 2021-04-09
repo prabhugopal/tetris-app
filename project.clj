@@ -5,7 +5,8 @@
             :url "https://www.eclipse.org/legal/epl-2.0/"}
   :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/tools.logging "0.4.1"]]
-  :plugins [[lein-codox "0.10.7"]]
+  :plugins [[lein-codox "0.10.7"]
+            [lein-cljfmt "0.7.0"]]
   :main ^:skip-aot tetris-app.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})
