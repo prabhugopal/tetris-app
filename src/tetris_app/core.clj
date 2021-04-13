@@ -1,8 +1,9 @@
 (ns tetris-app.core
   (:require [tetris-app.game.models :as models]
-            [clojure.tools.logging :as log])
+            [clojure.tools.logging :as log]
+            [clojure.pprint :as pprint])
   (:gen-class)
-  (:import (java.io BufferedReader)))
+  (:import (java.io BufferedReader StringWriter)))
 
 (declare
  get-input
@@ -15,15 +16,21 @@
  get-shape-orientation
  drop-rows-with-all-dirtycells
  new-state-with-dirty-cells
- group-cells-as-rows-cols)
+ group-cells-as-rows-cols
+ print-state->str
+ get-printable-state)
 
-(def grid-size 10)
+(def grid-size
+  10)
+
+
+
 
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (log/info "****** Welcome to SiTE a Simplified Tetris Engine  ******")
-  (doseq [input-shapes (get-input)]
+  (doseq [input-shapes (get-input "./input.txt")]
     (println
      (-> (play-game input-shapes grid-size)
          (parse-the-game-state-to-rows)))))
@@ -31,8 +38,11 @@
 ;; reads the input sequence from the console/file
 (defn get-input
   "reads the user input from console."
-  []
-  (line-seq (BufferedReader. *in*)))
+  ([]
+   (line-seq (BufferedReader. *in*)))
+  ([file]
+   (with-open [rdr (clojure.java.io/reader file)]
+     (into [] (line-seq rdr)))))
 
 ;; parses the game state to produce the resultant height
 (defn parse-the-game-state-to-rows
@@ -45,25 +55,31 @@
   "takes the  sequence of shapes and the grid-size as input. sequence of shapes should be comma seperated string e.g \"Q0,I4,T3\" and the number for grid size. outputs the game state."
   [input grid-size]
   (log/info
-   "*** Initiating a Game: input[ " input " ], grid-size:" grid-size)
+   "*** Initiating a Game: input[ " input " ], grid-size:" grid-size "\n")
   (let [shapes (clojure.string/split input #",")]
     (if ()
       (loop [[head & tail] shapes
              state []]
-        (log/info "Current Game State:" state)
+        (log/info "Current Game State:" (print-state->str state))
         (if (empty? head)
-          (do (log/info "Final Game State:" state)
+          (do (log/info "Final Game State:" (print-state->str state))
               state)
           (do
             (let [shape (str (first head))
                   col (Integer. (re-find #"\d+" head))]
-              (log/info "Processing the shape:" shape " @ column:" col)
+              (log/info "Processing the shape:" shape " @ column:" col "\n")
               (let [new-state (->> (get-valid-row shape col state grid-size)
                                    (draw-shape shape col)
                                    (group-cells-as-rows-cols)
                                    (new-state-with-dirty-cells state)
-                                   (drop-rows-with-all-dirtycells grid-size))]
-                (recur tail new-state)))))))))
+                                   )
+                    _state (drop-rows-with-all-dirtycells  grid-size new-state)
+                    ]
+                (print "\033[2J")
+                (print (print-state->str new-state))
+                (flush)
+                (Thread/sleep 1000)
+                (recur tail _state)))))))))
 
 ;; gets a valid row, 
 ;; find the available row for the shape and check if the shape fits using the grid size
@@ -72,10 +88,10 @@
   "takes the shape, column, game-sate and grid-size as inputs and produces the valid row (number) for the given shape to draw in the grid."
   [shape col state size]
   (let [new-row (pick-available-row shape col state)]
-    (log/info "new-row " new-row ", state:" (count state))
+    (log/debug "new-row " new-row ", state:" (count state))
     (if (> (count state) 0)
       (let [fit? (can-shape-fit? shape col new-row state size)]
-        (log/info "fit? :: " fit?)
+        (log/debug "fit? :: " fit?)
         (when (not fit?)
           (inc new-row))))
     new-row))
@@ -94,11 +110,11 @@
   "takes the shape, column, row and size as the inoput. checks can the shape fit in the provided row and produces the boolean value (true/false) output."
   [shape col row state size]
   (do
-    (log/info "state :: " state)
+    (log/debug "state :: " state)
     (not-any?
      (fn [dirty-cells]
        (do
-         (log/info "dirty-cells :: " dirty-cells "state :: " state)
+         (log/debug "dirty-cells :: " dirty-cells "state :: " state)
          (let [is-zero? (zero?
                          (compare
                           (vec (sort
@@ -109,7 +125,7 @@
                                 #(>= % size)
                                 (second dirty-cells))
                res (and is-zero? is-exceed-size?)]
-           (log/info "is-zero? ::  " is-zero? " is-exceed-size? :: " is-exceed-size?)
+           (log/debug "is-zero? ::  " is-zero? " is-exceed-size? :: " is-exceed-size?)
            res)))
      (group-cells-as-rows-cols (draw-shape shape col row)))))
 
@@ -120,29 +136,12 @@
 (defn pick-available-row
   "takes the shape, column and game-state as the input. and produces the immediate available row to draw the shape in a dirty manner. output type - number"
   [shape col state]
-  (log/info "pick-available-row col:: " col " state:: " state)
+  (log/debug "pick-available-row col:: " col " state:: " state)
   (loop [row (count state)
          [dirty-cells & remaining] (reverse state)]
     (if (or (some #(= col %) dirty-cells) (= 0 row))
       row
       (recur (dec row) remaining))))
-
-;; dirty pick of the available row without validating the size
-;; (defn pick-available-row
-;;  "takes the shape, column and game-state as the input. and produces the immediate available row to draw the shape in a dirty manner. output type - number"
-;;  [shape col state]
-;;  (if (some #(= shape %) ["Q" "S" "I" "L" "J"])
-;;    (loop [row (count state)
-;;           [dirty-cells & remaining] (reverse state)]
-;;      (if (or (some #(= col %) dirty-cells) (= 0 row))
-;;        row
-;;        (recur (dec row) remaining)))
-;;    (reduce
-;;     (fn [row dirty-cells]
-;;       (if (some #(= col %) dirty-cells)
-;;         (inc row)
-;;        row))
-;;     0 state)))
 
 
 ;; draws the shape in the grid with the provided row and col
@@ -163,8 +162,11 @@
 (defn drop-rows-with-all-dirtycells
   "takes the grid-size and game-state as input and drops all the completely occupied rows or the rows which do not have any empty cells/columns."
   [size state]
+  (log/debug "Clearing Occupied Row From Game State:" state)
+  (log/info "Clearing Occupied Row From Game State:" (print-state->str state))
   (reduce
    (fn [new-state row]
+     (log/debug "Checking for :" row size (count row))
      (if (not= (count row) size)
        (assoc new-state (count new-state) row)
        new-state))
@@ -174,10 +176,10 @@
 (defn new-state-with-dirty-cells
   "takes the current-state and occupied/dirty cells as input. produces the new state with merging the dirty cells."
   [current-state rows-cols]
-  (log/info "current-state :: " current-state " rows-cols :: " rows-cols)
+  (log/debug "current-state :: " current-state " rows-cols :: " rows-cols)
   (reduce
    (fn [state cells]
-     (log/info state "--" cells "--" (first cells))
+     (log/debug state "--" cells "--" (first cells))
      (assoc state (first cells)
             (set (concat (nth state (first cells) #{})
                          (last cells)))))
@@ -187,9 +189,24 @@
 (defn group-cells-as-rows-cols
   "this is a utility function which takes the grid-cells input and produces the grid-cells in vector rows-#{columns} format."
   [grid-cells]
-  (log/info "grid-cells: " grid-cells)
+  (log/debug "grid-cells: " grid-cells)
   (sort (map
          (fn [point]
            (do
              [(first point) (set (map last (last point)))]))
          (group-by first grid-cells))))
+
+(defn print-state->str
+  "function to print the state"
+  [state]
+  (let [reversed-state (rseq state)
+        printable-state (doall (map get-printable-state reversed-state))
+        init-row-string ""
+        newlined-state  (reduce #(str %1 (with-out-str (println %2))) init-row-string printable-state)]
+    (str "\n" newlined-state)))
+
+(defn get-printable-state
+  [state-row]
+  (let [init-row (into []  (take grid-size (repeat 0)))
+        filled-row (reduce #(assoc %1 %2 1) init-row state-row)]
+    (doall filled-row)))
