@@ -19,8 +19,6 @@
 
 
 ;; main entry to the game engine and plays the game with input
-
-
 (defn play-game
   "takes the  sequence of shapes and the grid-size as input. sequence of shapes should be comma separated string
   e.g \"Q0,I4,T3\" and the number for grid size. outputs the game state."
@@ -52,8 +50,6 @@
 ;; gets a valid row,
 ;; find the available row for the shape and check if the shape fits using the grid size
 ;; if fits return the row, otherwise increment the row
-
-
 (defn get-valid-row
   "takes the shape, column, game-sate and grid-size as inputs and produces the valid row (number) for
   the given shape to draw in the grid."
@@ -95,8 +91,6 @@
 
 
 ;; dirty pick of the available row without validating the size
-
-
 (defn pick-next-available-row
   "takes the shape, column and game-state as the input. and produces the immediate available row
   to draw the shape in a dirty manner. output type - number"
@@ -110,8 +104,6 @@
 
 
 ;; draws the shape in the grid with the provided row and col
-
-
 (defn draw-shape
   "takes the shape, column, and row as input and draws the shape in the grid. produces the points/cells of the shape.
   output type - vector of (x,y) cells/points"

@@ -23,11 +23,3 @@
              :J [       '(2 1)
                         '(1 1)
                  '(0 0) '(0 1)]})
-
-;;not used
-
-
-(def dirty-cells [])
-
-;;not used
-(def game-states {})

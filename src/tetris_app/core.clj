@@ -53,6 +53,7 @@
     (str "\n" newlined-state)))
 
 (defn get-printable-state
+  ""
   [grid-size state-row]
   (let [init-row (into []  (take grid-size (repeat 0)))
         filled-row (reduce #(assoc %1 %2 1) init-row state-row)]

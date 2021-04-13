@@ -26,8 +26,6 @@
         (get-valid-row size shape col state))))))
 
 ;;test for checking the can-shape-fit? method.
-
-
 (deftest test-can-shape-fit?
   (testing "can-shape-fit?.."
     (is
