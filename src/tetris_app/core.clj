@@ -8,6 +8,7 @@
 (declare
  get-input
  count-rows<-game-sate
+ clear-terminal
  draw-state->terminal
  print-state->str
  get-printable-state)
@@ -20,6 +21,7 @@
   [& args]
   (log/info "****** Welcome to SiTE a Simplified Tetris Engine  ******")
   (doseq [input-shapes (get-input "./input.txt")]
+    (clear-terminal)
     (let [rendering-fn (partial draw-state->terminal grid-size)]
       (println
        (-> (tetris-engine/play-game input-shapes grid-size rendering-fn)
@@ -59,8 +61,12 @@
         filled-row (reduce #(assoc %1 %2 1) init-row state-row)]
     (doall filled-row)))
 
+(defn clear-terminal
+  []
+  (print "\033[2J"))
+
 (defn draw-state->terminal
   [grid-size state]
-  (print "\033[2J")
+  (clear-terminal)
   (print (print-state->str grid-size state))
   (flush))
