@@ -24,7 +24,7 @@
       (is
        1
        (=
-        (get-valid-row shape col state size))))))
+        (get-valid-row size shape col state))))))
 
 ;;test for checking the can-shape-fit? method.
 
@@ -33,20 +33,20 @@
   (testing "can-shape-fit?.."
     (is
      false?
-     (can-shape-fit? "I" 8 0 [#{0 1 2 3}] 10))))
+     (can-shape-fit? 10 "I" 8 0 [#{0 1 2 3}]))))
 
 ;;Testing the game engine with the provided example to check the correctness. 
 (deftest test-example-1
   (testing "Example1 : I0,I4,Q8"
     (is 1 (= (-> (play-game "I0,I4,Q8" 10)
-                 (parse-the-game-state-to-rows))))))
+                 (count-rows<-game-sate))))))
 
 (deftest test-example-2
   (testing "Example2 : T1,Z3,I4"
     (is 4 (= (-> (play-game "T1,Z3,I4" 10)
-                 (parse-the-game-state-to-rows))))))
+                 (count-rows<-game-sate))))))
 
 (deftest test-example-3
   (testing "Example3 : Q0,I2,I6,I0,I6,I6,Q2,Q4"
     (is 3 (= (-> (play-game "Q0,I2,I6,I0,I6,I6,Q2,Q4" 10)
-                 (parse-the-game-state-to-rows))))))
+                 (count-rows<-game-sate))))))
